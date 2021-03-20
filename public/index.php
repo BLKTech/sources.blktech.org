@@ -31,9 +31,9 @@ function getClassPath($URI)
 
 function getURLs($classPath)
 {
-    $json = __DIR__ . '/../data/' . implode('.', $classPath) . '.json';
+    $json = __DIR__ . '/../data/' . strtolower(implode('.', $classPath)) . '.json';
     
-    if(file_exists($json))
+    if(!file_exists($json))
         return array();
         
     $json_data = file_get_contents($json);
