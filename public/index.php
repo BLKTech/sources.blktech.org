@@ -1,9 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 function getClassPath($URI)
 {
     $classPath = array();
@@ -32,7 +28,7 @@ function getClassPath($URI)
 function getURLs($classPath)
 {
     $json = __DIR__ . '/../data/' . strtolower(implode('.', $classPath)) . '.json';
-    
+
     if(!file_exists($json))
         return array();
         
@@ -52,26 +48,66 @@ function getURLs($classPath)
     return $json_object;   
 }
 
-$context  = stream_context_create(array('http' =>array('method'=>'HEAD')));
-$classPath = getClassPath($_SERVER['REQUEST_URI']);
+function isURLValid($url)
+{
+    $context = stream_context_create([
+        "http" => [
+            "method"        => 'HEAD',
+            "ignore_errors" => true,
+        ],
+    ]);
 
+    $fd = fopen($url, 'rb', false, $context);   
+    $meta = stream_get_meta_data($fd);
+    fclose($fd);
+    
+    if(!isset($meta['wrapper_data']))
+        return false;
+    
+    if(!isset($meta['wrapper_data'][0]))
+        return false;
+    
+    $header = explode(' ', $meta['wrapper_data'][0]);
 
-$className = array_pop($classPath);
-$middlePath = [];
+    if(!isset($header[1]))
+        return false;
 
-while (count($classPath) > 0) {
-
-    foreach(getURLs($classPath) as $repository)
-    {
-        $repositoryFile = $repository.'/'.implode('/', array_reverse($middlePath)).'/'.$className.'.php';
-        
-        $fd = fopen($repositoryFile, 'rb', false, $context);
-        var_dump(stream_get_meta_data($fd));
-        fclose($fd);
-        die($repositoryFile);
-    }
-
-    $middlePath[] = array_pop($classPath);
+    if(!is_numeric($header[1]))
+        return false;
+    
+    return intval($header[1]) < 400;    
 }
 
-print_r($path);
+
+try
+{
+    $classPath = getClassPath($_SERVER['REQUEST_URI']);
+
+    $className = array_pop($classPath);
+    $middlePath = [];
+
+    while (count($classPath) > 0) {
+
+        foreach(getURLs($classPath) as $repository)
+        {
+            $repositoryFile = implode('/', array_merge(array($repository), $middlePath, array($className.'.php')));
+
+            if(isURLValid($repositoryFile))
+            {
+                header('Location: ' . $repositoryFile);
+                exit();            
+            }
+        }
+
+        $middlePath[] = array_pop($classPath);
+    }
+
+    http_response_code(404);
+    exit();
+}
+ catch (\Exception $e)
+ {
+    http_response_code(500);
+    header('X-Error: ' . $e->getMessage());
+    exit();     
+ }
