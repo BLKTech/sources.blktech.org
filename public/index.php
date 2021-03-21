@@ -92,6 +92,7 @@ try
         {
             $repositoryFile = implode('/', array_merge(array($repository), $middlePath, array($className.'.php')));
 
+            header('X-URL: ' . $repositoryFile);
             if(isURLValid($repositoryFile))
             {
                 header('Location: ' . $repositoryFile);
