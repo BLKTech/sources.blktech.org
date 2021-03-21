@@ -90,7 +90,7 @@ try
 
         foreach(getURLs($classPath) as $repository)
         {
-            $repositoryFile = implode('/', array_merge(array($repository), $middlePath, array($className.'.php')));
+            $repositoryFile = implode('/', array_merge(array($repository), array_reverse($middlePath), array($className.'.php')));
 
             header('X-URL: ' . $repositoryFile);
             if(isURLValid($repositoryFile))
