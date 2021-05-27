@@ -81,7 +81,7 @@ function isURLValid($url)
 
 try
 {
-    $classPath = getClassPath($_SERVER['REQUEST_URI']);
+    $classPath = getClassPath(strtok($_SERVER["REQUEST_URI"], '?'));
 
     $className = array_pop($classPath);
     $middlePath = [];
