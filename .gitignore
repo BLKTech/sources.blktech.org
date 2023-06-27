@@ -3,3 +3,4 @@
 /trash
 /data/_*
 /cache/*
+.php-cs-fixer.cache
