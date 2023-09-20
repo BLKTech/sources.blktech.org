@@ -15,11 +15,11 @@ function getClassPath($URI)
             continue;
         }
 
-        if($element=='.') {
+        if($element == '.') {
             continue;
         }
 
-        if($element=='..') {
+        if($element == '..') {
             array_pop($path);
         }
 
@@ -39,13 +39,13 @@ function getURLs($classPath)
 
     $json_data = file_get_contents($json);
 
-    if($json_data===false) {
+    if($json_data === false) {
         return array();
     }
 
     $json_object = json_decode($json_data, true);
 
-    if($json_object===null) {
+    if($json_object === null) {
         return array();
     }
 
