@@ -6,3 +6,4 @@
 .php-cs-fixer.cache
 node_modules
 log
+tmp
